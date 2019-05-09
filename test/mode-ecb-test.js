@@ -15,16 +15,13 @@ YUI.add('mode-ecb-test', function (Y) {
         },
 
         testEncryptor: function () {
-            // Compute expected
             var expected = this.data.message.clone();
             var aes = C.algo.AES.createEncryptor(this.data.key);
             aes.encryptBlock(expected.words, 0);
             aes.encryptBlock(expected.words, 4);
 
-            // Compute actual
             var actual = C.AES.encrypt(this.data.message, this.data.key, { mode: C.mode.ECB, padding: C.pad.NoPadding }).ciphertext;
 
-            // Test
             Y.Assert.areEqual(expected.toString(), actual.toString());
         },
 

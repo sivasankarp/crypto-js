@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <title>CryptoJS Profile</title>
 
-        <!-- CryptoJS -->
         <script src="../src/core.js"></script>
         <script src="../src/x64-core.js"></script>
         <script src="../src/enc-utf16.js"></script>
@@ -32,10 +31,8 @@
         <script src="../src/aes.js"></script>
         <script src="../src/tripledes.js"></script>
 
-        <!-- YUI -->
         <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui-min.js"></script>
 
-        <!-- Profile subjects -->
         <script src="md5-profile.js"></script>
         <script src="sha1-profile.js"></script>
         <script src="sha256-profile.js"></script>
@@ -50,10 +47,8 @@
         <script src="des-profile.js"></script>
         <script src="tripledes-profile.js"></script>
 
-        <!-- Profile reports -->
         <script>
             YUI().use('profiler', 'console', 'substitute', function (Y) {
-                // Implement Profiler.add
                 Y.Profiler._subjects = [];
                 Y.Profiler.add = function (subject) {
                     Y.Profiler._subjects.push(subject);
@@ -62,7 +57,6 @@
                     return Y.Profiler._subjects;
                 };
 
-                // Objects to profile
                 var objects = [
                     'CryptoJS.lib.Base',
                     'CryptoJS.lib.WordArray',
@@ -135,57 +129,44 @@
                     }
                 }
 
-                // Load profile subjects
                 Y.use('*', function (Y) {
-                    // Iterate over profile subjects
                     var subjects = Y.Profiler.getSubjects();
                     for (var nSubject = 0; nSubject < subjects.length; nSubject++) {
-                        // Shortcut
                         var subject = subjects[nSubject];
 
-                        // Iterate over profile subject methods
                         for (var methodName in subject) {
                             if (typeof subject[methodName] == 'function' && methodName.indexOf('profile') == 0) {
-                                // Set up
                                 if (subject['setUp']) {
                                     subject['setUp']();
                                 }
 
-                                // Run
                                 registerObjects();
                                 subject[methodName]();
                                 unregisterObjects();
 
-                                // Tear down
                                 if (subject['tearDown']) {
                                     subject['tearDown']();
                                 }
 
-                                // Get reports
                                 var reports = Y.Profiler.getFullReport(function (report) {
-                                    // Skip reports with 0 calls
                                     if ( ! report.calls) {
                                         return false;
                                     }
 
-                                    // Create "total" entry
                                     report.total = 0;
                                     for (var i = 0; i < report.points.length; i++) {
                                         report.total += report.points[i];
                                     }
 
-                                    // Round "avg" entry
                                     report.avg = Number(report.avg.toFixed(4));
 
                                     return true;
                                 });
 
-                                // Add name to reports
                                 for (var name in reports) {
                                     reports[name].name = name;
                                 }
 
-                                // Sort reports by total time
                                 var orderedReports = [];
                                 for (var name in reports) {
                                     orderedReports.push(reports[name]);
@@ -194,10 +175,8 @@
                                     return ((b.total - a.total) || (b.calls - a.calls));
                                 });
 
-                                // Create profile source
                                 var source = subject.name + '_' + methodName;
 
-                                // Create console
                                 var yconsole = new Y.Console({
                                     style: 'block',
                                     width: '100%',
@@ -217,7 +196,6 @@
                                     render: true
                                 });
 
-                                // Restrict profile sources
                                 (function (yconsole, source) {
                                     yconsole.on('entry', function (e) {
                                         if (e.message.source != source) {
@@ -226,14 +204,12 @@
                                     });
                                 }(yconsole, source));
 
-                                // Collapse doesn't seem to work reliably unless we do it after DOM ready
                                 (function (yconsole) {
                                     Y.on('domready', function () {
                                         yconsole.collapse();
                                     });
                                 }(yconsole));
 
-                                // Log reports
                                 for (var i = 0; i < orderedReports.length; i++) {
                                     var template =
                                         '[{total}ms] {name}(): Called {calls} times. ' +
@@ -243,7 +219,6 @@
                                     Y.log(message, 'time', source);
                                 }
 
-                                // Clean slate for next profile subject
                                 Y.Profiler.clear();
                             }
                         }
@@ -252,7 +227,6 @@
             });
         </script>
 
-        <!-- Console -->
         <style type="text/css">
             body.yui3-skin-sam .yui3-console {
                 margin: 1em 0;

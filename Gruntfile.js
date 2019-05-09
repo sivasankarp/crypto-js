@@ -6,7 +6,6 @@ var path = require('path');
 
 module.exports = function (grunt) {
 
-    // Load all grunt tasks from node_modules, and config from /grunt/config
     require('load-grunt-config')(grunt, {
         configPath: path.join(process.cwd(), 'grunt/config'),
         config: {
@@ -32,7 +31,6 @@ module.exports = function (grunt) {
     
     
 
-    // Will load the custom tasks
     grunt.loadTasks('./grunt/tasks');
 
     grunt.registerTask('build', 'Build a bundle', [

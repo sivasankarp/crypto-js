@@ -1,24 +1,18 @@
 (function (Math) {
-    // Shortcuts
     var C = CryptoJS;
     var C_lib = C.lib;
     var WordArray = C_lib.WordArray;
     var Hasher = C_lib.Hasher;
     var C_algo = C.algo;
 
-    // Constants table
     var T = [];
 
-    // Compute constants
     (function () {
         for (var i = 0; i < 64; i++) {
             T[i] = (Math.abs(Math.sin(i + 1)) * 0x100000000) | 0;
         }
     }());
 
-    /**
-     * MD5 hash algorithm.
-     */
     var MD5 = C_algo.MD5 = Hasher.extend({
         _doReset: function () {
             this._hash = new WordArray.init([
@@ -28,9 +22,7 @@
         },
 
         _doProcessBlock: function (M, offset) {
-            // Swap endian
             for (var i = 0; i < 16; i++) {
-                // Shortcuts
                 var offset_i = offset + i;
                 var M_offset_i = M[offset_i];
 
@@ -40,7 +32,6 @@
                 );
             }
 
-            // Shortcuts
             var H = this._hash.words;
 
             var M_offset_0  = M[offset + 0];
@@ -60,13 +51,11 @@
             var M_offset_14 = M[offset + 14];
             var M_offset_15 = M[offset + 15];
 
-            // Working varialbes
             var a = H[0];
             var b = H[1];
             var c = H[2];
             var d = H[3];
 
-            // Computation
             a = FF(a, b, c, d, M_offset_0,  7,  T[0]);
             d = FF(d, a, b, c, M_offset_1,  12, T[1]);
             c = FF(c, d, a, b, M_offset_2,  17, T[2]);
@@ -135,7 +124,6 @@
             c = II(c, d, a, b, M_offset_2,  15, T[62]);
             b = II(b, c, d, a, M_offset_9,  21, T[63]);
 
-            // Intermediate hash value
             H[0] = (H[0] + a) | 0;
             H[1] = (H[1] + b) | 0;
             H[2] = (H[2] + c) | 0;
@@ -143,14 +131,12 @@
         },
 
         _doFinalize: function () {
-            // Shortcuts
             var data = this._data;
             var dataWords = data.words;
 
             var nBitsTotal = this._nDataBytes * 8;
             var nBitsLeft = data.sigBytes * 8;
 
-            // Add padding
             dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
 
             var nBitsTotalH = Math.floor(nBitsTotal / 0x100000000);
@@ -166,23 +152,18 @@
 
             data.sigBytes = (dataWords.length + 1) * 4;
 
-            // Hash final blocks
             this._process();
 
-            // Shortcuts
             var hash = this._hash;
             var H = hash.words;
 
-            // Swap endian
             for (var i = 0; i < 4; i++) {
-                // Shortcut
                 var H_i = H[i];
 
                 H[i] = (((H_i << 8)  | (H_i >>> 24)) & 0x00ff00ff) |
                        (((H_i << 24) | (H_i >>> 8))  & 0xff00ff00);
             }
 
-            // Return final computed hash
             return hash;
         },
 
@@ -214,35 +195,7 @@
         return ((n << s) | (n >>> (32 - s))) + b;
     }
 
-    /**
-     * Shortcut function to the hasher's object interface.
-     *
-     * @param {WordArray|string} message The message to hash.
-     *
-     * @return {WordArray} The hash.
-     *
-     * @static
-     *
-     * @example
-     *
-     *     var hash = CryptoJS.MD5('message');
-     *     var hash = CryptoJS.MD5(wordArray);
-     */
     C.MD5 = Hasher._createHelper(MD5);
 
-    /**
-     * Shortcut function to the HMAC's object interface.
-     *
-     * @param {WordArray|string} message The message to hash.
-     * @param {WordArray|string} key The secret key.
-     *
-     * @return {WordArray} The HMAC.
-     *
-     * @static
-     *
-     * @example
-     *
-     *     var hmac = CryptoJS.HmacMD5(message, key);
-     */
     C.HmacMD5 = Hasher._createHmacHelper(MD5);
 }(Math));

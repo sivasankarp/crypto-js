@@ -1,16 +1,13 @@
 (function (Math) {
-    // Shortcuts
     var C = CryptoJS;
     var C_lib = C.lib;
     var WordArray = C_lib.WordArray;
     var Hasher = C_lib.Hasher;
     var C_algo = C.algo;
 
-    // Initialization and round constants tables
     var H = [];
     var K = [];
 
-    // Compute constants
     (function () {
         function isPrime(n) {
             var sqrtN = Math.sqrt(n);
@@ -43,22 +40,17 @@
         }
     }());
 
-    // Reusable object
     var W = [];
 
-    /**
-     * SHA-256 hash algorithm.
-     */
+  
     var SHA256 = C_algo.SHA256 = Hasher.extend({
         _doReset: function () {
             this._hash = new WordArray.init(H.slice(0));
         },
 
         _doProcessBlock: function (M, offset) {
-            // Shortcut
             var H = this._hash.words;
 
-            // Working variables
             var a = H[0];
             var b = H[1];
             var c = H[2];
@@ -68,7 +60,6 @@
             var g = H[6];
             var h = H[7];
 
-            // Computation
             for (var i = 0; i < 64; i++) {
                 if (i < 16) {
                     W[i] = M[offset + i] | 0;
@@ -105,7 +96,6 @@
                 a = (t1 + t2) | 0;
             }
 
-            // Intermediate hash value
             H[0] = (H[0] + a) | 0;
             H[1] = (H[1] + b) | 0;
             H[2] = (H[2] + c) | 0;
@@ -117,23 +107,19 @@
         },
 
         _doFinalize: function () {
-            // Shortcuts
             var data = this._data;
             var dataWords = data.words;
 
             var nBitsTotal = this._nDataBytes * 8;
             var nBitsLeft = data.sigBytes * 8;
 
-            // Add padding
             dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
             dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] = Math.floor(nBitsTotal / 0x100000000);
             dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] = nBitsTotal;
             data.sigBytes = dataWords.length * 4;
 
-            // Hash final blocks
             this._process();
 
-            // Return final computed hash
             return this._hash;
         },
 
@@ -145,35 +131,8 @@
         }
     });
 
-    /**
-     * Shortcut function to the hasher's object interface.
-     *
-     * @param {WordArray|string} message The message to hash.
-     *
-     * @return {WordArray} The hash.
-     *
-     * @static
-     *
-     * @example
-     *
-     *     var hash = CryptoJS.SHA256('message');
-     *     var hash = CryptoJS.SHA256(wordArray);
-     */
+ 
     C.SHA256 = Hasher._createHelper(SHA256);
 
-    /**
-     * Shortcut function to the HMAC's object interface.
-     *
-     * @param {WordArray|string} message The message to hash.
-     * @param {WordArray|string} key The secret key.
-     *
-     * @return {WordArray} The HMAC.
-     *
-     * @static
-     *
-     * @example
-     *
-     *     var hmac = CryptoJS.HmacSHA256(message, key);
-     */
     C.HmacSHA256 = Hasher._createHmacHelper(SHA256);
 }(Math));

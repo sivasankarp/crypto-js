@@ -1,12 +1,10 @@
 (function () {
-    // Shortcuts
     var C = CryptoJS;
     var C_lib = C.lib;
     var WordArray = C_lib.WordArray;
     var BlockCipher = C_lib.BlockCipher;
     var C_algo = C.algo;
 
-    // Permuted Choice 1 constants
     var PC1 = [
         57, 49, 41, 33, 25, 17, 9,  1,
         58, 50, 42, 34, 26, 18, 10, 2,
@@ -17,7 +15,6 @@
         29, 21, 13, 5,  28, 20, 12, 4
     ];
 
-    // Permuted Choice 2 constants
     var PC2 = [
         14, 17, 11, 24, 1,  5,
         3,  28, 15, 6,  21, 10,
@@ -29,10 +26,8 @@
         46, 42, 50, 36, 29, 32
     ];
 
-    // Cumulative bit shift constants
     var BIT_SHIFTS = [1,  2,  4,  6,  8,  10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28];
 
-    // SBOXes and round permutation constants
     var SBOX_P = [
         {
             0x0: 0x808200,
@@ -564,49 +559,34 @@
         }
     ];
 
-    // Masks that select the SBOX input
     var SBOX_MASK = [
         0xf8000001, 0x1f800000, 0x01f80000, 0x001f8000,
         0x0001f800, 0x00001f80, 0x000001f8, 0x8000001f
     ];
 
-    /**
-     * DES block cipher algorithm.
-     */
     var DES = C_algo.DES = BlockCipher.extend({
         _doReset: function () {
-            // Shortcuts
             var key = this._key;
             var keyWords = key.words;
 
-            // Select 56 bits according to PC1
             var keyBits = [];
             for (var i = 0; i < 56; i++) {
                 var keyBitPos = PC1[i] - 1;
                 keyBits[i] = (keyWords[keyBitPos >>> 5] >>> (31 - keyBitPos % 32)) & 1;
             }
 
-            // Assemble 16 subkeys
             var subKeys = this._subKeys = [];
             for (var nSubKey = 0; nSubKey < 16; nSubKey++) {
-                // Create subkey
                 var subKey = subKeys[nSubKey] = [];
 
-                // Shortcut
                 var bitShift = BIT_SHIFTS[nSubKey];
 
-                // Select 48 bits according to PC2
                 for (var i = 0; i < 24; i++) {
-                    // Select from the left 28 key bits
                     subKey[(i / 6) | 0] |= keyBits[((PC2[i] - 1) + bitShift) % 28] << (31 - i % 6);
 
-                    // Select from the right 28 key bits
                     subKey[4 + ((i / 6) | 0)] |= keyBits[28 + (((PC2[i + 24] - 1) + bitShift) % 28)] << (31 - i % 6);
                 }
 
-                // Since each subkey is applied to an expanded 32-bit input,
-                // the subkey can be broken into 8 values scaled to 32-bits,
-                // which allows the key to be used without expansion
                 subKey[0] = (subKey[0] << 1) | (subKey[0] >>> 31);
                 for (var i = 1; i < 7; i++) {
                     subKey[i] = subKey[i] >>> ((i - 1) * 4 + 3);
@@ -614,7 +594,6 @@
                 subKey[7] = (subKey[7] << 5) | (subKey[7] >>> 27);
             }
 
-            // Compute inverse subkeys
             var invSubKeys = this._invSubKeys = [];
             for (var i = 0; i < 16; i++) {
                 invSubKeys[i] = subKeys[15 - i];
@@ -630,25 +609,20 @@
         },
 
         _doCryptBlock: function (M, offset, subKeys) {
-            // Get input
             this._lBlock = M[offset];
             this._rBlock = M[offset + 1];
 
-            // Initial permutation
             exchangeLR.call(this, 4,  0x0f0f0f0f);
             exchangeLR.call(this, 16, 0x0000ffff);
             exchangeRL.call(this, 2,  0x33333333);
             exchangeRL.call(this, 8,  0x00ff00ff);
             exchangeLR.call(this, 1,  0x55555555);
 
-            // Rounds
             for (var round = 0; round < 16; round++) {
-                // Shortcuts
                 var subKey = subKeys[round];
                 var lBlock = this._lBlock;
                 var rBlock = this._rBlock;
 
-                // Feistel function
                 var f = 0;
                 for (var i = 0; i < 8; i++) {
                     f |= SBOX_P[i][((rBlock ^ subKey[i]) & SBOX_MASK[i]) >>> 0];
@@ -657,19 +631,16 @@
                 this._rBlock = lBlock ^ f;
             }
 
-            // Undo swap from last round
             var t = this._lBlock;
             this._lBlock = this._rBlock;
             this._rBlock = t;
 
-            // Final permutation
             exchangeLR.call(this, 1,  0x55555555);
             exchangeRL.call(this, 8,  0x00ff00ff);
             exchangeRL.call(this, 2,  0x33333333);
             exchangeLR.call(this, 16, 0x0000ffff);
             exchangeLR.call(this, 4,  0x0f0f0f0f);
 
-            // Set output
             M[offset] = this._lBlock;
             M[offset + 1] = this._rBlock;
         },
@@ -681,7 +652,6 @@
         blockSize: 64/32
     });
 
-    // Swap bits across the left and right words
     function exchangeLR(offset, mask) {
         var t = ((this._lBlock >>> offset) ^ this._rBlock) & mask;
         this._rBlock ^= t;
@@ -694,26 +664,14 @@
         this._rBlock ^= t << offset;
     }
 
-    /**
-     * Shortcut functions to the cipher's object interface.
-     *
-     * @example
-     *
-     *     var ciphertext = CryptoJS.DES.encrypt(message, key, cfg);
-     *     var plaintext  = CryptoJS.DES.decrypt(ciphertext, key, cfg);
-     */
     C.DES = BlockCipher._createHelper(DES);
 
-    /**
-     * Triple-DES block cipher algorithm.
-     */
+    
     var TripleDES = C_algo.TripleDES = BlockCipher.extend({
         _doReset: function () {
-            // Shortcuts
             var key = this._key;
             var keyWords = key.words;
 
-            // Create DES instances
             this._des1 = DES.createEncryptor(WordArray.create(keyWords.slice(0, 2)));
             this._des2 = DES.createEncryptor(WordArray.create(keyWords.slice(2, 4)));
             this._des3 = DES.createEncryptor(WordArray.create(keyWords.slice(4, 6)));
@@ -738,13 +696,5 @@
         blockSize: 64/32
     });
 
-    /**
-     * Shortcut functions to the cipher's object interface.
-     *
-     * @example
-     *
-     *     var ciphertext = CryptoJS.TripleDES.encrypt(message, key, cfg);
-     *     var plaintext  = CryptoJS.TripleDES.decrypt(ciphertext, key, cfg);
-     */
     C.TripleDES = BlockCipher._createHelper(TripleDES);
 }());

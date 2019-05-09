@@ -1,19 +1,15 @@
-/** @preserve
- * Counter block mode compatible with  Dr Brian Gladman fileenc.c
- * derived from CryptoJS.mode.CTR 
- * Jan Hruby jhruby.web@gmail.com
- */
+
 CryptoJS.mode.CTRGladman = (function () {
     var CTRGladman = CryptoJS.lib.BlockCipherMode.extend();
 
 	function incWord(word)
 	{	
-		if (((word >> 24) & 0xff) === 0xff) { //overflow
+		if (((word >> 24) & 0xff) === 0xff) { 
 		var b1 = (word >> 16)&0xff;
 		var b2 = (word >> 8)&0xff;
 		var b3 = word & 0xff;
 
-		if (b1 === 0xff) // overflow b1
+		if (b1 === 0xff) 
 		{		 
 		b1 = 0;
 		if (b2 === 0xff)
@@ -54,7 +50,7 @@ CryptoJS.mode.CTRGladman = (function () {
 	{
 		if ((counter[0] = incWord(counter[0])) === 0)
 		{
-			// encr_data in fileenc.c from  Dr Brian Gladman's counts only with DWORD j < 8
+			
 			counter[1] = incWord(counter[1]);
 		}
 		return counter;
@@ -62,17 +58,14 @@ CryptoJS.mode.CTRGladman = (function () {
 	
     var Encryptor = CTRGladman.Encryptor = CTRGladman.extend({
         processBlock: function (words, offset) {
-            // Shortcuts
             var cipher = this._cipher
             var blockSize = cipher.blockSize;
             var iv = this._iv;
             var counter = this._counter;
 
-            // Generate keystream
             if (iv) {
                 counter = this._counter = iv.slice(0);
 
-                // Remove IV for subsequent blocks
                 this._iv = undefined;
             }
             
@@ -81,7 +74,6 @@ CryptoJS.mode.CTRGladman = (function () {
 			var keystream = counter.slice(0);
             cipher.encryptBlock(keystream, 0);
 
-            // Encrypt
             for (var i = 0; i < blockSize; i++) {
                 words[offset + i] ^= keystream[i];
             }

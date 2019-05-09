@@ -1,11 +1,6 @@
 function extendWithCMAC(C) {
     function createExt(C) {
-        /*
-         * The MIT License (MIT)
-         *
-         * Copyright (c) 2015 artjomb
-         */
-        // put on ext property in CryptoJS
+        
         var ext;
         if (!C.hasOwnProperty("ext")) {
             ext = C.ext = {};
@@ -13,42 +8,26 @@ function extendWithCMAC(C) {
             ext = C.ext;
         }
 
-        // Shortcuts
         var Base = C.lib.Base;
         var WordArray = C.lib.WordArray;
 
-        // Constants
         ext.const_Zero = new WordArray.init([0x00000000, 0x00000000, 0x00000000, 0x00000000]);
         ext.const_One = new WordArray.init([0x00000000, 0x00000000, 0x00000000, 0x00000001]);
-        ext.const_Rb = new WordArray.init([0x00000000, 0x00000000, 0x00000000, 0x00000087]); // 00..0010000111
-        ext.const_Rb_Shifted = new WordArray.init([0x80000000, 0x00000000, 0x00000000, 0x00000043]); // 100..001000011
-        ext.const_nonMSB = new WordArray.init([0xFFFFFFFF, 0xFFFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF]); // 1^64 || 0^1 || 1^31 || 0^1 || 1^31
+        ext.const_Rb = new WordArray.init([0x00000000, 0x00000000, 0x00000000, 0x00000087]); 
+        ext.const_Rb_Shifted = new WordArray.init([0x80000000, 0x00000000, 0x00000000, 0x00000043]);
+        ext.const_nonMSB = new WordArray.init([0xFFFFFFFF, 0xFFFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF]); 
 
-        /**
-         * Looks into the object to see if it is a WordArray.
-         *
-         * @param obj Some object
-         *
-         * @returns {boolean}
-         */
         ext.isWordArray = function(obj) {
             return obj && typeof obj.clamp === "function" && typeof obj.concat === "function" && typeof obj.words === "array";
         }
 
-        /**
-         * This padding is a 1 bit followed by as many 0 bits as needed to fill
-         * up the block. This implementation doesn't work on bits directly,
-         * but on bytes. Therefore the granularity is much bigger.
-         */
+     
         C.pad.OneZeroPadding = {
             pad: function (data, blocksize) {
-                // Shortcut
                 var blockSizeBytes = blocksize * 4;
 
-                // Count padding bytes
                 var nPaddingBytes = blockSizeBytes - data.sigBytes % blockSizeBytes;
 
-                // Create padding
                 var paddingWords = [];
                 for (var i = 0; i < nPaddingBytes; i += 4) {
                     var paddingWord = 0x00000000;
@@ -59,31 +38,17 @@ function extendWithCMAC(C) {
                 }
                 var padding = new WordArray.init(paddingWords, nPaddingBytes);
 
-                // Add padding
                 data.concat(padding);
             },
             unpad: function () {
-                // TODO: implement
             }
         };
 
-        /**
-         * No padding is applied. This is necessary for streaming cipher modes
-         * like CTR.
-         */
         C.pad.NoPadding = {
             pad: function () {},
             unpad: function () {}
         };
 
-        /**
-         * Returns the n leftmost bytes of the WordArray.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         * @param {int} n Bytes to retrieve
-         *
-         * @returns new WordArray
-         */
         ext.leftmostBytes = function(wordArray, n){
             var lmArray = wordArray.clone();
             lmArray.sigBytes = n;
@@ -91,14 +56,7 @@ function extendWithCMAC(C) {
             return lmArray;
         };
 
-        /**
-         * Returns the n rightmost bytes of the WordArray.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         * @param {int} n Bytes to retrieve (must be positive)
-         *
-         * @returns new WordArray
-         */
+     
         ext.rightmostBytes = function(wordArray, n){
             wordArray.clamp();
             var wordSize = 32;
@@ -117,31 +75,14 @@ function extendWithCMAC(C) {
             return rmArray;
         };
 
-        /**
-         * Returns the n rightmost words of the WordArray. It assumes
-         * that the current WordArray has at least n words.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         * @param {int} n Words to retrieve (must be positive)
-         *
-         * @returns popped words as new WordArray
-         */
+      
         ext.popWords = function(wordArray, n){
             var left = wordArray.words.splice(0, n);
             wordArray.sigBytes -= n * 4;
             return new WordArray.init(left);
         };
 
-        /**
-         * Shifts the array to the left and returns the shifted dropped elements
-         * as WordArray. The initial WordArray must contain at least n bytes and
-         * they have to be significant.
-         *
-         * @param {WordArray} wordArray WordArray to work on (is modified)
-         * @param {int} n Bytes to shift (must be positive, default 16)
-         *
-         * @returns new WordArray
-         */
+     
         ext.shiftBytes = function(wordArray, n){
             n = n || 16;
             var r = n % 4;
@@ -163,29 +104,13 @@ function extendWithCMAC(C) {
             return shiftedArray;
         };
 
-        /**
-         * XORs arr2 to the end of arr1 array. This doesn't modify the current
-         * array aside from clamping.
-         *
-         * @param {WordArray} arr1 Bigger array
-         * @param {WordArray} arr2 Smaller array to be XORed to the end
-         *
-         * @returns new WordArray
-         */
+    
         ext.xorendBytes = function(arr1, arr2){
-            // TODO: more efficient
             return ext.leftmostBytes(arr1, arr1.sigBytes-arr2.sigBytes)
                     .concat(ext.xor(ext.rightmostBytes(arr1, arr2.sigBytes), arr2));
         };
 
-        /**
-         * Doubling operation on a 128-bit value. This operation modifies the
-         * passed array.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         *
-         * @returns passed WordArray
-         */
+ 
         ext.dbl = function(wordArray){
             var carry = ext.msb(wordArray);
             ext.bitshift(wordArray, 1);
@@ -193,14 +118,6 @@ function extendWithCMAC(C) {
             return wordArray;
         };
 
-        /**
-         * Inverse operation on a 128-bit value. This operation modifies the
-         * passed array.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         *
-         * @returns passed WordArray
-         */
         ext.inv = function(wordArray){
             var carry = wordArray.words[4] & 1;
             ext.bitshift(wordArray, -1);
@@ -208,14 +125,6 @@ function extendWithCMAC(C) {
             return wordArray;
         };
 
-        /**
-         * Check whether the word arrays are equal.
-         *
-         * @param {WordArray} arr1 Array 1
-         * @param {WordArray} arr2 Array 2
-         *
-         * @returns boolean
-         */
         ext.equals = function(arr1, arr2){
             if (!arr2 || !arr2.words || arr1.sigBytes !== arr2.sigBytes) {
                 return false;
@@ -229,25 +138,13 @@ function extendWithCMAC(C) {
             return equal === 0;
         };
 
-        /**
-         * Retrieves the most significant bit of the WordArray as an Integer.
-         *
-         * @param {WordArray} arr
-         *
-         * @returns Integer
-         */
         ext.msb = function(arr) {
             return arr.words[0] >>> 31;
         }
     }
 
     function createExtBit(C) {
-        /*
-         * The MIT License (MIT)
-         *
-         * Copyright (c) 2015 artjomb
-         */
-        // put on ext property in CryptoJS
+
         var ext;
         if (!C.hasOwnProperty("ext")) {
             ext = C.ext = {};
@@ -255,15 +152,7 @@ function extendWithCMAC(C) {
             ext = C.ext;
         }
 
-        /**
-         * Shifts the array by n bits to the left. Zero bits are added as the
-         * least significant bits. This operation modifies the current array.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         * @param {int} n Bits to shift by
-         *
-         * @returns the WordArray that was passed in
-         */
+   
         ext.bitshift = function(wordArray, n){
             var carry = 0,
                 words = wordArray.words,
@@ -272,19 +161,15 @@ function extendWithCMAC(C) {
                 carryMask;
             if (n > 0) {
                 while(n > 31) {
-                    // delete first element:
                     words.splice(0, 1);
 
-                    // add `0` word to the back
                     words.push(0);
 
                     n -= 32;
                     skipped++;
                 }
                 if (n == 0) {
-                    // 1. nothing to shift if the shift amount is on a word boundary
-                    // 2. This has to be done, because the following algorithm computes
-                    // wrong values only for n==0
+                    
                     return carry;
                 }
                 for(var i = words.length - skipped - 1; i >= 0; i--) {
@@ -295,17 +180,17 @@ function extendWithCMAC(C) {
                 }
             } else if (n < 0) {
                 while(n < -31) {
-                    // insert `0` word to the front:
+                  
                     words.splice(0, 0, 0);
 
-                    // remove last element:
+                   
                     words.length--;
 
                     n += 32;
                     skipped++;
                 }
                 if (n == 0) {
-                    // nothing to shift if the shift amount is on a word boundary
+                  
                     return carry;
                 }
                 n = -n;
@@ -320,13 +205,7 @@ function extendWithCMAC(C) {
             return carry;
         };
 
-        /**
-         * Negates all bits in the WordArray. This manipulates the given array.
-         *
-         * @param {WordArray} wordArray WordArray to work on
-         *
-         * @returns the WordArray that was passed in
-         */
+     
         ext.neg = function(wordArray){
             var words = wordArray.words;
             for(var i = 0; i < words.length; i++) {
@@ -335,16 +214,6 @@ function extendWithCMAC(C) {
             return wordArray;
         };
 
-        /**
-         * Applies XOR on both given word arrays and returns a third resulting
-         * WordArray. The initial word arrays must have the same length
-         * (significant bytes).
-         *
-         * @param {WordArray} wordArray1 WordArray
-         * @param {WordArray} wordArray2 WordArray
-         *
-         * @returns first passed WordArray (modified)
-         */
         ext.xor = function(wordArray1, wordArray2){
             for(var i = 0; i < wordArray1.words.length; i++) {
                 wordArray1.words[i] ^= wordArray2.words[i];
@@ -352,15 +221,6 @@ function extendWithCMAC(C) {
             return wordArray1;
         };
 
-        /**
-         * Logical AND between the two passed arrays. Both arrays must have the
-         * same length.
-         *
-         * @param {WordArray} arr1 Array 1
-         * @param {WordArray} arr2 Array 2
-         *
-         * @returns new WordArray
-         */
         ext.bitand = function(arr1, arr2){
             var newArr = arr1.clone(),
                 tw = newArr.words,
@@ -373,12 +233,7 @@ function extendWithCMAC(C) {
     }
 
     function createCMAC(C) {
-        /*
-         * The MIT License (MIT)
-         *
-         * Copyright (c) 2015 artjomb
-         */
-        // Shortcuts
+     
         var Base = C.lib.Base;
         var WordArray = C.lib.WordArray;
         var AES = C.algo.AES;
@@ -386,27 +241,15 @@ function extendWithCMAC(C) {
         var OneZeroPadding = C.pad.OneZeroPadding;
 
         var CMAC = C.algo.CMAC = Base.extend({
-            /**
-             * Initializes a newly created CMAC
-             *
-             * @param {WordArray} key The secret key
-             *
-             * @example
-             *
-             *     var cmacer = CryptoJS.algo.CMAC.create(key);
-             */
+          
             init: function(key){
-                // generate sub keys...
                 this._aes = AES.createEncryptor(key, { iv: new WordArray.init(), padding: C.pad.NoPadding });
 
-                // Step 1
                 var L = this._aes.finalize(ext.const_Zero);
 
-                // Step 2
                 var K1 = L.clone();
                 ext.dbl(K1);
 
-                // Step 3
                 if (!this._isTwo) {
                     var K2 = K1.clone();
                     ext.dbl(K2);
@@ -434,7 +277,6 @@ function extendWithCMAC(C) {
                     return this;
                 }
 
-                // Shortcuts
                 var buffer = this._buffer;
                 var bsize = this._const_Bsize;
 
@@ -453,14 +295,12 @@ function extendWithCMAC(C) {
                     this._counter++;
                 }
 
-                // Chainable
                 return this;
             },
 
             finalize: function (messageUpdate) {
                 this.update(messageUpdate);
 
-                // Shortcuts
                 var buffer = this._buffer;
                 var bsize = this._const_Bsize;
 
@@ -474,7 +314,7 @@ function extendWithCMAC(C) {
 
                 ext.xor(M_last, this._x);
 
-                this.reset(); // Can be used immediately afterwards
+                this.reset(); 
 
                 this._aes.reset();
                 return this._aes.finalize(M_last);
@@ -483,14 +323,7 @@ function extendWithCMAC(C) {
             _isTwo: false
         });
 
-        /**
-         * Directly invokes the CMAC and returns the calculated MAC.
-         *
-         * @param {WordArray} key The key to be used for CMAC
-         * @param {WordArray|string} message The data to be MAC'ed (either WordArray or UTF-8 encoded string)
-         *
-         * @returns {WordArray} MAC
-         */
+     
         C.CMAC = function(key, message){
             return CMAC.create(key).finalize(message);
         };
@@ -509,7 +342,6 @@ function extendWithCMAC(C) {
 YUI.add('cipher-core-test', function (Y) {
     var C = CryptoJS;
 
-    // Extend with CMAC to test `cipher-core.js` L:457-462
     extendWithCMAC(C);
 
     Y.Test.Runner.add(new Y.Test.Case({

@@ -13,7 +13,6 @@ YUI.add('lib-serializablecipher-test', function (Y) {
         },
 
         testEncrypt: function () {
-            // Compute expected
             var aes = C.algo.AES.createEncryptor(this.data.key, { iv: this.data.iv });
             var ciphertext = aes.finalize(this.data.message);
             var expected = C.lib.CipherParams.create({
@@ -27,10 +26,8 @@ YUI.add('lib-serializablecipher-test', function (Y) {
                 formatter: C.format.OpenSSL
             });
 
-            // Compute actual
             var actual = C.lib.SerializableCipher.encrypt(C.algo.AES, this.data.message, this.data.key, { iv: this.data.iv });
 
-            // Test
             Y.Assert.areEqual(expected.toString(), actual.toString());
             Y.Assert.areEqual(expected.ciphertext.toString(), actual.ciphertext.toString());
             Y.Assert.areEqual(expected.key.toString(), actual.key.toString());

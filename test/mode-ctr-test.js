@@ -16,21 +16,17 @@ YUI.add('mode-ctr-test', function (Y) {
         },
 
         testEncryptor: function () {
-            // Compute expected
             var expected = this.data.message.clone();
             var aes = C.algo.AES.createEncryptor(this.data.key);
 
-            // Counter initialized with IV
             var counter = this.data.iv.words.slice(0);
 
-            // First block XORed with encrypted counter
             var keystream = counter.slice(0);
             aes.encryptBlock(keystream, 0);
             for (var i = 0; i < 4; i++) {
                 expected.words[i] ^= keystream[i];
             }
 
-            // Subsequent blocks XORed with encrypted incremented counter
             counter[3]++;
             var keystream = counter.slice(0);
             aes.encryptBlock(keystream, 0);
@@ -38,10 +34,8 @@ YUI.add('mode-ctr-test', function (Y) {
                 expected.words[i] ^= keystream[i % 4];
             }
 
-            // Compute actual
             var actual = C.AES.encrypt(this.data.message, this.data.key, { iv: this.data.iv, mode: C.mode.CTR, padding: C.pad.NoPadding }).ciphertext;
 
-            // Test
             Y.Assert.areEqual(expected.toString(), actual.toString());
         },
 

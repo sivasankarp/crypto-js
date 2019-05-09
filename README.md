@@ -77,7 +77,6 @@ require(["crypto-js/aes", "crypto-js/sha256"], function (AES, SHA256) {
 Including all libraries, for access to extra methods:
 
 ```javascript
-// Above-mentioned will work or use this simple form
 require.config({
     paths: {
         'crypto-js': 'path-to/bower_components/crypto-js/crypto-js'
@@ -110,14 +109,12 @@ See: https://cryptojs.gitbook.io/docs/
 ```javascript
 var CryptoJS = require("crypto-js");
 
-// Encrypt
 var ciphertext = CryptoJS.AES.encrypt('my message', 'secret key 123').toString();
 
-// Decrypt
 var bytes  = CryptoJS.AES.decrypt(ciphertext, 'secret key 123');
 var originalText = bytes.toString(CryptoJS.enc.Utf8);
 
-console.log(originalText); // 'my message'
+console.log(originalText); 
 ```
 
 #### Object encryption
@@ -127,14 +124,12 @@ var CryptoJS = require("crypto-js");
 
 var data = [{id: 1}, {id: 2}]
 
-// Encrypt
 var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(data), 'secret key 123').toString();
 
-// Decrypt
 var bytes  = CryptoJS.AES.decrypt(ciphertext, 'secret key 123');
 var decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
 
-console.log(decryptedData); // [{id: 1}, {id: 2}]
+console.log(decryptedData); 
 ```
 
 ### List of modules

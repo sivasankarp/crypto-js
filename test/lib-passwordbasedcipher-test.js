@@ -5,10 +5,8 @@ YUI.add('lib-passwordbasedcipher-test', function (Y) {
         name: 'PasswordBasedCipher',
 
         testEncrypt: function () {
-            // Compute actual
             var actual = C.lib.PasswordBasedCipher.encrypt(C.algo.AES, 'Hello, World!', 'password');
 
-            // Compute expected
             var aes = C.algo.AES.createEncryptor(actual.key, { iv: actual.iv });
             var expected = aes.finalize('Hello, World!');
 

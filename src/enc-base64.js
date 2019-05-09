@@ -1,37 +1,19 @@
 (function () {
-    // Shortcuts
     var C = CryptoJS;
     var C_lib = C.lib;
     var WordArray = C_lib.WordArray;
     var C_enc = C.enc;
 
-    /**
-     * Base64 encoding strategy.
-     */
+
     var Base64 = C_enc.Base64 = {
-        /**
-         * Converts a word array to a Base64 string.
-         *
-         * @param {WordArray} wordArray The word array.
-         *
-         * @return {string} The Base64 string.
-         *
-         * @static
-         *
-         * @example
-         *
-         *     var base64String = CryptoJS.enc.Base64.stringify(wordArray);
-         */
+
         stringify: function (wordArray) {
-            // Shortcuts
             var words = wordArray.words;
             var sigBytes = wordArray.sigBytes;
             var map = this._map;
 
-            // Clamp excess bits
             wordArray.clamp();
 
-            // Convert
             var base64Chars = [];
             for (var i = 0; i < sigBytes; i += 3) {
                 var byte1 = (words[i >>> 2]       >>> (24 - (i % 4) * 8))       & 0xff;
@@ -45,7 +27,6 @@
                 }
             }
 
-            // Add padding
             var paddingChar = map.charAt(64);
             if (paddingChar) {
                 while (base64Chars.length % 4) {
@@ -55,22 +36,7 @@
 
             return base64Chars.join('');
         },
-
-        /**
-         * Converts a Base64 string to a word array.
-         *
-         * @param {string} base64Str The Base64 string.
-         *
-         * @return {WordArray} The word array.
-         *
-         * @static
-         *
-         * @example
-         *
-         *     var wordArray = CryptoJS.enc.Base64.parse(base64String);
-         */
         parse: function (base64Str) {
-            // Shortcuts
             var base64StrLength = base64Str.length;
             var map = this._map;
             var reverseMap = this._reverseMap;
@@ -82,7 +48,6 @@
                     }
             }
 
-            // Ignore padding
             var paddingChar = map.charAt(64);
             if (paddingChar) {
                 var paddingIndex = base64Str.indexOf(paddingChar);
@@ -91,7 +56,6 @@
                 }
             }
 
-            // Convert
             return parseLoop(base64Str, base64StrLength, reverseMap);
 
         },

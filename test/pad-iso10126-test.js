@@ -7,10 +7,8 @@ YUI.add('pad-iso10126-test', function (Y) {
         setUp: function () {
             this.data = {};
 
-            // Save original random method
             this.data.random = C.lib.WordArray.random;
 
-            // Replace random method with one that returns a predictable value
             C.lib.WordArray.random = function (nBytes) {
                 var words = [];
                 for (var i = 0; i < nBytes; i += 4) {
@@ -22,7 +20,6 @@ YUI.add('pad-iso10126-test', function (Y) {
         },
 
         tearDown: function () {
-            // Restore random method
             C.lib.WordArray.random = this.data.random;
         },
 

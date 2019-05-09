@@ -9,7 +9,6 @@ module.exports = {
             dest: '<%= meta.build %>'
         }],
         options: {
-            // all
             "index": {
                 "global": "CryptoJS",
                 "exports": "CryptoJS",
@@ -22,7 +21,6 @@ module.exports = {
                 "components": ["core", "x64-core", "lib-typedarrays", "enc-utf16", "enc-base64", "md5", "sha1", "sha256", "sha224", "sha512", "sha384", "sha3", "ripemd160", "hmac", "pbkdf2", "evpkdf", "cipher-core", "mode-cfb", "mode-ctr", "mode-ctr-gladman", "mode-ofb", "mode-ecb", "pad-ansix923", "pad-iso10126", "pad-iso97971", "pad-zeropadding", "pad-nopadding", "format-hex", "aes", "tripledes", "rc4", "rabbit", "rabbit-legacy"]
             },
 
-            // hash
             "md5": {
                 "exports": "CryptoJS.MD5",
                 "components": ["core", "md5"]
@@ -56,7 +54,6 @@ module.exports = {
                 "components": ["core", "ripemd160"]
             },
 
-            // hmac hash
             "hmac-md5": {
                 "exports": "CryptoJS.HmacMD5",
                 "components": ["core", "md5", "hmac"]
@@ -98,7 +95,6 @@ module.exports = {
                 "components": ["core", "sha1", "hmac", "evpkdf"]
             },
 
-            // cipher
             "aes": {
                 "exports": "CryptoJS.AES",
                 "components": ["core", "enc-base64", "md5", "evpkdf", "cipher-core", "aes"]
@@ -120,7 +116,6 @@ module.exports = {
                 "components": ["core", "enc-base64", "md5", "evpkdf", "cipher-core", "rabbit-legacy"]
             },
 
-            // core
             "core": {
                 "exports": "CryptoJS",
                 "components": ["core"],
@@ -137,13 +132,11 @@ module.exports = {
                 "components": ["core", "evpkdf", "cipher-core"]
             },
 
-            // lib
             "lib-typedarrays": {
                 "exports": "CryptoJS.lib.WordArray",
                 "components": ["core", "lib-typedarrays"]
             },
 
-            // format
             "format-openssl": {
                 "exports": "CryptoJS.format.OpenSSL",
                 "components": ["core", "cipher-core"]
@@ -153,7 +146,6 @@ module.exports = {
                 "components": ["core", "cipher-core", "format-hex"]
             },
 
-            // enc
             "enc-latin1": {
                 "exports": "CryptoJS.enc.Latin1",
                 "components": ["core"]
@@ -175,7 +167,6 @@ module.exports = {
                 "components": ["core", "enc-base64"]
             },
 
-            // mode
             "mode-cfb": {
                 "exports": "CryptoJS.mode.CFB",
                 "components": ["core", "cipher-core", "mode-cfb"]
@@ -197,7 +188,6 @@ module.exports = {
                 "components": ["core", "cipher-core", "mode-ecb"]
             },
 
-            // pad
             "pad-pkcs7": {
                 "exports": "CryptoJS.pad.Pkcs7",
                 "components": ["core", "cipher-core", "pad-pkcs7"]

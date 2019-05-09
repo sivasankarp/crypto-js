@@ -1,6 +1,4 @@
-/**
- * Electronic Codebook block mode.
- */
+
 CryptoJS.mode.ECB = (function () {
     var ECB = CryptoJS.lib.BlockCipherMode.extend();
 

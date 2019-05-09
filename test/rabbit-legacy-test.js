@@ -55,10 +55,8 @@ YUI.add('algo-rabbit-legacy-test', function (Y) {
         },
 
         testHelper: function () {
-            // Save original random method
             var random = C.lib.WordArray.random;
 
-            // Replace random method with one that returns a predictable value
             C.lib.WordArray.random = function (nBytes) {
                 var words = [];
                 for (var i = 0; i < nBytes; i += 4) {
@@ -68,12 +66,10 @@ YUI.add('algo-rabbit-legacy-test', function (Y) {
                 return C.lib.WordArray.create(words, nBytes);
             };
 
-            // Test
             Y.Assert.areEqual(C.algo.RabbitLegacy.createEncryptor(C.MD5('Jefe')).finalize('Hi There').toString(), C.RabbitLegacy.encrypt('Hi There', C.MD5('Jefe')).ciphertext.toString());
             Y.Assert.areEqual(C.lib.SerializableCipher.encrypt(C.algo.RabbitLegacy, 'Hi There', C.MD5('Jefe')).toString(), C.RabbitLegacy.encrypt('Hi There', C.MD5('Jefe')).toString());
             Y.Assert.areEqual(C.lib.PasswordBasedCipher.encrypt(C.algo.RabbitLegacy, 'Hi There', 'Jefe').toString(), C.RabbitLegacy.encrypt('Hi There', 'Jefe').toString());
 
-            // Restore random method
             C.lib.WordArray.random = random;
         }
     }));

@@ -21,7 +21,6 @@ module.exports = function (grunt) {
     			indent: "\t"
     		};
 
-        // Prepare Factory-Module-Definition settings
         _.each(options, function (conf, name) {
             var sources = [],
 
@@ -39,7 +38,6 @@ module.exports = function (grunt) {
 				opts.global = conf.global;
 			}
 
-            // Find and add self as source
             _.each(this.filesSrc, function (source) {
     			if (grunt.file.exists(source + name + ".js")) {
     				sources.push(source + name + ".js");
@@ -47,7 +45,6 @@ module.exports = function (grunt) {
             }, this);
 
             if (conf.pack) {
-    			// Collect all components
     			deps = _.chain(conf.components)
     			    .map(function (depName) {
         			    return options[depName].components;
@@ -60,7 +57,6 @@ module.exports = function (grunt) {
         			})
         			.value();
 
-                // Add components as source files -> results a single file
                 _.each(this.filesSrc, function (source) {
                     _.each(deps, function (depName) {
             			if (grunt.file.exists(source + depName + ".js")) {
@@ -69,20 +65,16 @@ module.exports = function (grunt) {
         			});
                 }, this);
             } else {
-    			// Read components and add them as dependecies
     			_.each(_.without(conf.components, name), function (value, i) {
     				opts.depends['./' + value] = value === "core" ? "CryptoJS" : null;
     			});
 			}
 
-			// Remove duplicates
 			sources = _.uniq(sources);
 
-            // Add module settings to fmd definition
 			modules[name] = [sources, opts];
 		}, this);
 
-		// Build packege modules
 		fmd(config)
 			.define(modules)
 			.build(function (createdFiles) {

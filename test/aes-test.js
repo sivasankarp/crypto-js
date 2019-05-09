@@ -55,10 +55,8 @@ YUI.add('algo-aes-test', function (Y) {
         },
 
         testHelper: function () {
-            // Save original random method
             var random = C.lib.WordArray.random;
 
-            // Replace random method with one that returns a predictable value
             C.lib.WordArray.random = function (nBytes) {
                 var words = [];
                 for (var i = 0; i < nBytes; i += 4) {
@@ -68,12 +66,10 @@ YUI.add('algo-aes-test', function (Y) {
                 return C.lib.WordArray.create(words, nBytes);
             };
 
-            // Test
             Y.Assert.areEqual(C.algo.AES.createEncryptor(C.SHA256('Jefe'), { mode: C.mode.ECB, padding: C.pad.NoPadding }).finalize('Hi There').toString(), C.AES.encrypt('Hi There', C.SHA256('Jefe'), { mode: C.mode.ECB, padding: C.pad.NoPadding }).ciphertext.toString());
             Y.Assert.areEqual(C.lib.SerializableCipher.encrypt(C.algo.AES, 'Hi There', C.SHA256('Jefe'), { mode: C.mode.ECB, padding: C.pad.NoPadding }).toString(), C.AES.encrypt('Hi There', C.SHA256('Jefe'), { mode: C.mode.ECB, padding: C.pad.NoPadding }).toString());
             Y.Assert.areEqual(C.lib.PasswordBasedCipher.encrypt(C.algo.AES, 'Hi There', 'Jefe', { mode: C.mode.ECB, padding: C.pad.NoPadding }).toString(), C.AES.encrypt('Hi There', 'Jefe', { mode: C.mode.ECB, padding: C.pad.NoPadding }).toString());
 
-            // Restore random method
             C.lib.WordArray.random = random;
         }
     }));
